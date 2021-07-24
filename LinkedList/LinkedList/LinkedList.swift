@@ -193,6 +193,116 @@ extension LinkedList: ExpressibleByArrayLiteral {
     }
 }
 
+// 链表排序
+extension LinkedList {
+    func sorted(by areInIncreasingOrder: (Value, Value) -> Bool) -> LinkedList {
+        guard count > 1 else { return self }
+        
+        var res = self.copy()
+        res.sort(by: areInIncreasingOrder)
+        return res
+    }
+    
+    private func copy() -> LinkedList {
+        var res: LinkedList<Value> = []
+        res._count = count
+        var oldNode = head!
+        
+        res.head = Node(value: oldNode.value)
+        var newNode = res.head
+        while let nextOldValue = oldNode.next {
+            newNode?.next = Node(value: nextOldValue.value)
+            newNode = newNode?.next
+            oldNode = nextOldValue
+        }
+        
+        res.tail = newNode
+        return res
+    }
+    
+    mutating func sort(by areInIncreasingOrder: (Value, Value) -> Bool) {
+        guard count > 1 else { return }
+        
+        var lo = head!, mid = head!, hi = head!
+        while !(lo === head && mid === tail) {
+            lo = head!
+            while true {
+                mid = findBlock(by: areInIncreasingOrder, lo)
+                if mid === tail {
+                    break
+                } else {
+                    hi = findBlock(by: areInIncreasingOrder, mid.next!)
+                    merge(areInIncreasingOrder, lo, mid, &hi)
+                    if hi === tail {
+                        break
+                    } else {
+                        lo = hi.next!
+                    }
+                }
+            }
+        }
+    }
+    
+    private func findBlock(by areInIncreasingOrder: (Value, Value) -> Bool, _ lo: Node) -> Node {
+        var node = lo
+        while node !== tail && !areInIncreasingOrder(node.next!.value, node.value) {
+            node = node.next!
+        }
+        return node
+    }
+    
+    private mutating func merge(
+        _ areInIncreasingOrder: (Value, Value) -> Bool,
+        _ lo: Node,
+        _ mid: Node,
+        _ hi: inout Node
+    ) {
+        var i: Node? = lo, j: Node? = mid.next
+        var k = Node(value: lo.value)
+        let first = k
+        while true {
+            if i === mid.next {
+                k.value = j!.value
+                j = j!.next
+            } else if j === hi.next {
+                k.value = i!.value
+                i = i!.next
+            } else if areInIncreasingOrder(j!.value, i!.value) {
+                k.value = j!.value
+                j = j!.next
+            } else {
+                k.value = i!.value
+                i = i!.next
+            }
+            
+            if !(i === mid.next && j === hi.next) {
+                k.next = Node(value: lo.value)
+                k = k.next!
+            } else {
+                break
+            }
+        }
+        
+        k.next = hi.next
+        lo.value = first.value
+        lo.next = first.next
+        if hi === tail {
+            tail = k
+            hi = k
+        }
+    }
+}
+
+extension LinkedList where Value: Comparable {
+    mutating func sort() {
+        sort(by: <)
+    }
+    
+    func sorted() -> LinkedList {
+        sorted(by: <)
+    }
+}
+
 extension LinkedList: CustomStringConvertible {
     public var description: String {
         "[" + lazy.map { "\($0)" }.joined(separator: ", ") + "]"
