@@ -91,8 +91,8 @@ extension Array where Element: Comparable {
 
 extension Array {
     mutating func insertionSort(by areInIncreasingOrder: (Element, Element) -> Bool, lo: Int, hi: Int) {
-        for i in (lo + 1)...hi {
-            for j in stride(from: i - 1, through: lo, by: -1) {
+        for i in lo..<hi {
+            for j in stride(from: i, through: lo, by: -1) {
                 if areInIncreasingOrder(self[j + 1], self[j]) {
                     (self[j + 1], self[j]) = (self[j], self[j + 1])
                 } else {
