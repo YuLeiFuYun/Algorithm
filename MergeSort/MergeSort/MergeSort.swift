@@ -34,7 +34,7 @@ extension Array {
         _ lo: Int,
         _ hi: Int
     ) {
-        if hi < lo + 8 {
+        if hi <= lo + 8 {
             dst.insertionSort(by: areInIncreasingOrder, lo: lo, hi: hi)
             return
         }
@@ -44,9 +44,7 @@ extension Array {
         _mergeSort(&dst, &src, areInIncreasingOrder, mid + 1, hi)
         
         if !areInIncreasingOrder(src[mid + 1], src[mid]) {
-            (lo...hi).forEach {
-                src[$0] = dst[$0]
-            }
+            (lo...hi).forEach { dst[$0] = src[$0] }
         } else {
             merge(src, &dst, areInIncreasingOrder, lo, mid, hi)
         }
