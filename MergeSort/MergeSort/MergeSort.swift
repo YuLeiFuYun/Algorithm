@@ -197,7 +197,7 @@ extension Array {
          if isCurrentDestinationArray {
              if !areInIncreasingOrder(self[mid + 1], self[mid]) {
                  (lo...hi).forEach {
-                     self[$0] = aux[$0]
+                     aux[$0] = self[$0]
                  }
              } else {
                  merge(&aux, isCurrentDestinationArray, areInIncreasingOrder, lo, mid, hi)
@@ -205,7 +205,7 @@ extension Array {
          } else {
              if !areInIncreasingOrder(aux[mid + 1], aux[mid]) {
                  (lo...hi).forEach {
-                     aux[$0] = self[$0]
+                     self[$0] = aux[$0]
                  }
              } else {
                  merge(&aux, isCurrentDestinationArray, areInIncreasingOrder, lo, mid, hi)
