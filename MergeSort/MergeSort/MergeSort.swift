@@ -13,47 +13,47 @@ import Foundation
  · 测试数组是否已经有序
  · 不将元素复制到辅助数组（在递归调用的每个层次交换输入数组和辅助数组的角色）
  */
-extension Array {
+extension Array where Element: Comparable {
     func mergeSorted(by areInIncreasingOrder: (Element, Element) -> Bool) -> [Element] {
-        guard count > 1 else { return self }
-        
-        var src = self
-        var dst = self
-        _mergeSort(&src, &dst, areInIncreasingOrder, 0, count - 1)
-        return dst
+        var res = self
+        res.mergeSort(by: areInIncreasingOrder)
+        return res
     }
     
     mutating func mergeSort(by areInIncreasingOrder: (Element, Element) -> Bool) {
-        self = mergeSorted(by: areInIncreasingOrder)
+        guard count > 1 else { return }
+        
+        var aux = self
+        sort(by: areInIncreasingOrder, &aux, 0, count - 1)
     }
     
-    private func _mergeSort(
-        _ src: inout [Element],
-        _ dst: inout [Element],
-        _ areInIncreasingOrder: (Element, Element) -> Bool,
+    private mutating func sort(
+        by areInIncreasingOrder: (Element, Element) -> Bool,
+        _ aux: inout [Element],
         _ lo: Int,
         _ hi: Int
     ) {
         if hi <= lo + 8 {
-            dst.insertionSort(by: areInIncreasingOrder, lo: lo, hi: hi)
+            insertionSort(by: areInIncreasingOrder, lo: lo, hi: hi)
             return
         }
         
         let mid = lo + (hi - lo) / 2
-        _mergeSort(&dst, &src, areInIncreasingOrder, lo, mid)
-        _mergeSort(&dst, &src, areInIncreasingOrder, mid + 1, hi)
+        (self, aux) = (aux, self)
+        sort(by: areInIncreasingOrder, &aux, lo, mid)
+        sort(by: areInIncreasingOrder, &aux, mid + 1, hi)
         
-        if !areInIncreasingOrder(src[mid + 1], src[mid]) {
-            (lo...hi).forEach { dst[$0] = src[$0] }
+        (self, aux) = (aux, self)
+        if areInIncreasingOrder(aux[mid + 1], aux[mid]) {
+            merge(areInIncreasingOrder, aux, lo, mid, hi)
         } else {
-            merge(src, &dst, areInIncreasingOrder, lo, mid, hi)
+            (lo...hi).forEach { self[$0] = aux[$0] }
         }
     }
     
-    private func merge(
-        _ src: [Element],
-        _ dst: inout [Element],
+    private mutating func merge(
         _ areInIncreasingOrder: (Element, Element) -> Bool,
+        _ aux: [Element],
         _ lo: Int,
         _ mid: Int,
         _ hi: Int
@@ -61,16 +61,16 @@ extension Array {
         var i = lo, j = mid + 1
         for k in lo...hi {
             if i > mid {
-                dst[k] = src[j]
+                self[k] = aux[j]
                 j += 1
             } else if j > hi {
-                dst[k] = src[i]
+                self[k] = aux[i]
                 i += 1
-            } else if areInIncreasingOrder(src[j], src[i]) {
-                dst[k] = src[j]
+            } else if areInIncreasingOrder(aux[j], aux[i]) {
+                self[k] = aux[j]
                 j += 1
             } else {
-                dst[k] = src[i]
+                self[k] = aux[i]
                 i += 1
             }
         }
@@ -92,7 +92,7 @@ extension Array {
         for i in lo..<hi {
             for j in stride(from: i, through: lo, by: -1) {
                 if areInIncreasingOrder(self[j + 1], self[j]) {
-                    (self[j + 1], self[j]) = (self[j], self[j + 1])
+                    swapAt(j, j + 1)
                 } else {
                     break
                 }
@@ -163,99 +163,6 @@ extension Array {
         }
     }
 }
-
-// 只使用一个辅助数组
-/*
- extension Array {
-     mutating func mergeSort(by areInIncreasingOrder: (Element, Element) -> Bool) {
-         guard count > 1 else { return }
-         
-         var aux = self
-         _mergeSort(&aux, false, areInIncreasingOrder, 0, count - 1)
-     }
-     
-     private mutating func _mergeSort(
-         _ aux: inout [Element],
-         _ isCurrentDestinationArray: Bool,
-         _ areInIncreasingOrder: (Element, Element) -> Bool,
-         _ lo: Int,
-         _ hi: Int
-     ) {
-         if hi < lo + 8 {
-             if isCurrentDestinationArray {
-                 aux.insertionSort(by: areInIncreasingOrder, lo: lo, hi: hi)
-             } else {
-                 insertionSort(by: areInIncreasingOrder, lo: lo, hi: hi)
-             }
-             return
-         }
-         
-         let mid = lo + (hi - lo) / 2
-         _mergeSort(&aux, !isCurrentDestinationArray, areInIncreasingOrder, lo, mid)
-         _mergeSort(&aux, !isCurrentDestinationArray, areInIncreasingOrder, mid + 1, hi)
-         
-         if isCurrentDestinationArray {
-             if !areInIncreasingOrder(self[mid + 1], self[mid]) {
-                 (lo...hi).forEach {
-                     aux[$0] = self[$0]
-                 }
-             } else {
-                 merge(&aux, isCurrentDestinationArray, areInIncreasingOrder, lo, mid, hi)
-             }
-         } else {
-             if !areInIncreasingOrder(aux[mid + 1], aux[mid]) {
-                 (lo...hi).forEach {
-                     self[$0] = aux[$0]
-                 }
-             } else {
-                 merge(&aux, isCurrentDestinationArray, areInIncreasingOrder, lo, mid, hi)
-             }
-         }
-     }
-     
-     private mutating func merge(
-         _ aux: inout [Element],
-         _ isCurrentDestinationArray: Bool,
-         _ areInIncreasingOrder: (Element, Element) -> Bool,
-         _ lo: Int,
-         _ mid: Int,
-         _ hi: Int
-     ) {
-         var i = lo, j = mid + 1
-         for k in lo...hi {
-             if isCurrentDestinationArray {
-                 if i > mid {
-                     aux[k] = self[j]
-                     j += 1
-                 } else if j > hi {
-                     aux[k] = self[i]
-                     i += 1
-                 } else if areInIncreasingOrder(self[j], self[i]) {
-                     aux[k] = self[j]
-                     j += 1
-                 } else {
-                     aux[k] = self[i]
-                     i += 1
-                 }
-             } else {
-                 if i > mid {
-                     self[k] = aux[j]
-                     j += 1
-                 } else if j > hi {
-                     self[k] = aux[i]
-                     i += 1
-                 } else if areInIncreasingOrder(aux[j], aux[i]) {
-                     self[k] = aux[j]
-                     j += 1
-                 } else {
-                     self[k] = aux[i]
-                     i += 1
-                 }
-             }
-         }
-     }
- }
- */
 
 /*
 extension Array {
