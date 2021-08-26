@@ -1,13 +1,13 @@
 //
-//  IndexMinPriorityQueue.swift
-//  IndexMinPriorityQueue
+//  IndexedMaxPriorityQueue.swift
+//  IndexedMaxPriorityQueue
 //
-//  Created by 玉垒浮云 on 2021/8/24.
+//  Created by 玉垒浮云 on 2021/8/26.
 //
 
 import Foundation
 
-struct IndexMinPriorityQueue<Key: Comparable> {
+struct IndexedMaxPriorityQueue<Key: Comparable> {
     // 存储索引优先队列中的元素
     private var keys: [Key?]
     
@@ -42,14 +42,14 @@ struct IndexMinPriorityQueue<Key: Comparable> {
         return qp[i] != -1
     }
     
-    // keys 中最小元素的索引
-    func minIndex() -> Int {
+    // keys 中最大元素的索引
+    func maxIndex() -> Int {
         precondition(!isEmpty, "Priority queue underflow")
         return pq[1]
     }
     
-    // keys 中的最小元素
-    func minKey() -> Key {
+    // keys 中的最大元素
+    func maxKey() -> Key {
         precondition(!isEmpty, "Priority queue underflow")
         return keys[pq[1]]!
     }
@@ -70,17 +70,16 @@ struct IndexMinPriorityQueue<Key: Comparable> {
         swim(n)
     }
     
-    // 删除最小元素并返回其关联索引
-    mutating func delMin() -> Int {
-        let idx = minIndex()
+    // 删除最大元素并返回其关联索引
+    mutating func delMax() -> Int {
+        let idx = maxIndex()
         exch(1, n)
-        
         keys[idx] = nil
         pq[n] = -1
         qp[idx] = -1
-        
         n -= 1
         sink(1)
+        
         return idx
     }
     
@@ -99,12 +98,11 @@ struct IndexMinPriorityQueue<Key: Comparable> {
         
         let idx = qp[i]
         exch(idx, n)
-        keys[i] = nil
-        qp[i] = -1
-        
         n -= 1
         swim(idx)
         sink(idx)
+        keys[i] = nil
+        qp[i] = -1
     }
     
     // 将与索引 i 关联的 key 减少到指定值
@@ -124,11 +122,11 @@ struct IndexMinPriorityQueue<Key: Comparable> {
     }
 }
 
-private extension IndexMinPriorityQueue {
+private extension IndexedMaxPriorityQueue {
     // 上浮
     mutating func swim(_ k: Int) {
         var k = k
-        while k > 1 && greatThan(k / 2, k) {
+        while k > 1 && lessThan(k / 2, k) {
             exch(k / 2, k)
             k /= 2
         }
@@ -139,16 +137,16 @@ private extension IndexMinPriorityQueue {
         var k = k, j = 0
         while 2 * k <= n {
             j = 2 * k
-            if j < n && greatThan(j, j + 1) { j += 1 }
-            if !greatThan(k, j) { break }
+            if j < n && lessThan(j, j + 1) { j += 1 }
+            if !lessThan(k, j) { break }
             exch(k, j)
             k = j
         }
     }
     
-    // 判断堆中索引 i 处的元素是否大于索引 j 处的元素
-    func greatThan(_ i: Int, _ j: Int) -> Bool {
-        keys[pq[i]]! > keys[pq[j]]!
+    // 判断堆中索引 i 处的元素是否小于索引 j 处的元素
+    func lessThan(_ i: Int, _ j: Int) -> Bool {
+        keys[pq[i]]! < keys[pq[j]]!
     }
     
     // 交换堆中 i 索引和 j 索引处的值

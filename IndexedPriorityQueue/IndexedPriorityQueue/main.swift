@@ -1,8 +1,8 @@
 //
 //  main.swift
-//  IndexPriorityQueue
+//  IndexedPriorityQueue
 //
-//  Created by 玉垒浮云 on 2021/8/23.
+//  Created by 玉垒浮云 on 2021/8/26.
 //
 
 import Foundation
@@ -13,7 +13,7 @@ extension Array where Element: Collection, Element.Element: Comparable {
     func multiwayMerge<T>() -> T where T: RangeReplaceableCollection, T.Element == Element.Element {
         guard !isEmpty else { return T.init() }
         
-        var pq = IndexMinPriorityQueue<Element.Element>(capacity: count)
+        var pq = IndexedMinPriorityQueue<Element.Element>(capacity: count)
         var startIdx: Element.Index, idxs: [Element.Index] = []
         for i in 0..<count {
             if !self[i].isEmpty {
@@ -38,6 +38,7 @@ extension Array where Element: Collection, Element.Element: Comparable {
     }
 }
 
-var inputs = [[1,3,5,7,9], [1,2,4,5,6], [3,7,8,10], [2,3,4,6,9,12]]
+var inputs = [[1,3,5,7,9], [1,2,4,5,6], [3,7,8,10], [2,3,4,6,9,12], [7,9,9,15]]
 let res: [Int] = inputs.multiwayMerge()
 print(res)
+
