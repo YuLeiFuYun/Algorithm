@@ -10,6 +10,7 @@
 		4EB2189C26D7BCB600240D80 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EB2189B26D7BCB600240D80 /* main.swift */; };
 		4EB218A326D7BCD100240D80 /* IndexedMinPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EB218A226D7BCD100240D80 /* IndexedMinPriorityQueue.swift */; };
 		4EB218A526D7BD7200240D80 /* IndexedMaxPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EB218A426D7BD7200240D80 /* IndexedMaxPriorityQueue.swift */; };
+		4EB218A726D8893500240D80 /* IndexedPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EB218A626D8893500240D80 /* IndexedPriorityQueue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,7 @@
 		4EB2189B26D7BCB600240D80 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		4EB218A226D7BCD100240D80 /* IndexedMinPriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexedMinPriorityQueue.swift; sourceTree = "<group>"; };
 		4EB218A426D7BD7200240D80 /* IndexedMaxPriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexedMaxPriorityQueue.swift; sourceTree = "<group>"; };
+		4EB218A626D8893500240D80 /* IndexedPriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexedPriorityQueue.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				4EB2189B26D7BCB600240D80 /* main.swift */,
 				4EB218A226D7BCD100240D80 /* IndexedMinPriorityQueue.swift */,
 				4EB218A426D7BD7200240D80 /* IndexedMaxPriorityQueue.swift */,
+				4EB218A626D8893500240D80 /* IndexedPriorityQueue.swift */,
 			);
 			path = IndexedPriorityQueue;
 			sourceTree = "<group>";
@@ -127,6 +130,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4EB218A326D7BCD100240D80 /* IndexedMinPriorityQueue.swift in Sources */,
+				4EB218A726D8893500240D80 /* IndexedPriorityQueue.swift in Sources */,
 				4EB218A526D7BD7200240D80 /* IndexedMaxPriorityQueue.swift in Sources */,
 				4EB2189C26D7BCB600240D80 /* main.swift in Sources */,
 			);

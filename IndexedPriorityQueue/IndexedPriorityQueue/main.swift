@@ -8,33 +8,38 @@
 import Foundation
 
 // 索引优先队列的应用：多路归并
-extension Array where Element: Collection, Element.Element: Comparable {
-    // 数组中的元素为升序序列
-    func multiwayMerge<T>() -> T where T: RangeReplaceableCollection, T.Element == Element.Element {
+extension Array where Element: Collection {
+    func multiwayMerge<T>(comparator: @escaping (T.Element, T.Element) -> Bool) -> T where T: RangeReplaceableCollection, T.Element == Element.Element {
         guard !isEmpty else { return T.init() }
         
-        var pq = IndexedMinPriorityQueue<Element.Element>(capacity: count)
+        var pq = IndexedPriorityQueue<Element.Element>(capacity: count, comparator: comparator)
         var startIdx: Element.Index, idxs: [Element.Index] = []
         for i in 0..<count {
             if !self[i].isEmpty {
                 startIdx = self[i].startIndex
-                pq.insert(i, self[i][startIdx])
+                pq[i] = self[i][startIdx]
                 idxs.append(self[i].index(after: startIdx))
             }
         }
         
-        var res: T = .init(), current = 0
+        var res: T = .init(), idx = 0
         while !pq.isEmpty {
-            res.append(pq.minKey())
-            current = pq.delMin()
+            idx = pq.headIndex()
+            res.append(pq.dequeueHead())
             
-            if idxs[current] != self[current].endIndex {
-                pq.insert(current, self[current][idxs[current]])
-                idxs[current] = self[current].index(after: idxs[current])
+            if idxs[idx] != self[idx].endIndex {
+                pq[idx] = self[idx][idxs[idx]]
+                idxs[idx] = self[idx].index(after: idxs[idx])
             }
         }
         
         return res
+    }
+}
+
+extension Array where Element: Collection, Element.Element: Comparable {
+    func multiwayMerge<T>() -> T where T: RangeReplaceableCollection, T.Element == Element.Element {
+        multiwayMerge(comparator: <)
     }
 }
 
