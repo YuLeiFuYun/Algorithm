@@ -47,16 +47,21 @@ extension DoublyLinkedList: MutableCollection {
         set {
             precondition(position != endIndex, "Index out of range")
             
-            let beforeNode = copyNodes(before: position)
-            let fromNode = copyNodes(from: position)
-            beforeNode?.next = fromNode
-            fromNode?.previous = beforeNode
-            fromNode?.value = newValue
+            if position == startIndex {
+                tail = copyNodes(before: endIndex)
+                head?.value = newValue
+            } else {
+                let fromNode = copyNodes(from: position)
+                let beforeNode = copyNodes(before: position)
+                beforeNode?.next = fromNode
+                fromNode?.previous = beforeNode
+                fromNode?.value = newValue
+            }
         }
     }
     
     public struct Index: Comparable {
-        fileprivate var node: Node?
+        fileprivate weak var node: Node?
         fileprivate var offset: Int
         
         public static func == (lhs: Index, rhs: Index) -> Bool {
@@ -92,41 +97,35 @@ extension DoublyLinkedList: RangeReplaceableCollection {
             } else if newElements.isEmpty {
                 head = copyNodes(from: upperBound)
             } else {
+                let fromNode = copyNodes(from: upperBound)
+                
                 var node: Node?
                 (head, node) = createNodes(with: newElements)
-                
-                let fromNode = copyNodes(from: upperBound)
                 node?.next = fromNode
                 fromNode?.previous = node
             }
         } else if lowerBound == endIndex {
-            if newElements.isEmpty { return }
+            tail = copyNodes(before: endIndex)
+            guard !newElements.isEmpty else { return }
             
             let list = createNodes(with: newElements)
-            tail = copyNodes(before: endIndex)
             list.head?.previous = tail
             tail?.next = list.head
             tail = list.tail
         } else {
-            let beforeNode = copyNodes(before: lowerBound)
             let fromNode = copyNodes(from: upperBound)
+            let beforeNode = copyNodes(before: lowerBound)
             if newElements.isEmpty {
                 beforeNode?.next = fromNode
                 fromNode?.previous = beforeNode
-                
-                if upperBound == endIndex {
-                    tail = beforeNode
-                }
+                if upperBound == endIndex { tail = beforeNode }
             } else {
                 let list = createNodes(with: newElements)
                 beforeNode?.next = list.head
                 list.head?.previous = beforeNode
                 list.tail?.next = fromNode
                 fromNode?.previous = list.tail
-                
-                if upperBound == endIndex {
-                    tail = list.tail
-                }
+                if upperBound == endIndex { tail = list.tail }
             }
         }
     }

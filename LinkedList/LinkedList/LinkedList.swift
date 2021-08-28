@@ -45,13 +45,20 @@ extension LinkedList: MutableCollection {
         set {
             precondition(position != endIndex, "Index out of range")
             
-            let node = copyNodes(until: position)
-            node?.value = newValue
+            if position == startIndex {
+                tail = copyNodes(before: endIndex)
+                head?.value = newValue
+            } else {
+                let fromNode = copyNodes(from: position)
+                let beforeNode = copyNodes(before: position)
+                beforeNode?.next = fromNode
+                fromNode?.value = newValue
+            }
         }
     }
     
     public struct Index: Comparable {
-        fileprivate var node: Node?
+        fileprivate weak var node: Node?
         fileprivate var offset: Int
         
         public static func == (lhs: Index, rhs: Index) -> Bool {
@@ -78,34 +85,32 @@ extension LinkedList: RangeReplaceableCollection {
             if upperBound == endIndex {
                 (head, tail) = createNodes(with: newElements)
             } else if newElements.isEmpty {
-                head = upperBound.node
+                head = copyNodes(from: upperBound)
             } else {
+                let fromNode = copyNodes(from: upperBound)
+                
                 var node: Node?
                 (head, node) = createNodes(with: newElements)
-                node?.next = upperBound.node
+                node?.next = fromNode
             }
         } else if lowerBound == endIndex {
-            if newElements.isEmpty { return }
+            tail = copyNodes(before: endIndex)
+            guard !newElements.isEmpty else { return }
             
             let list = createNodes(with: newElements)
-            tail = copyNodes(before: endIndex)
             tail?.next = list.head
             tail = list.tail
         } else {
-            let node = copyNodes(before: lowerBound)
+            let fromNode = upperBound == endIndex ? nil : copyNodes(from: upperBound)
+            let beforeNode = copyNodes(before: lowerBound)
             if newElements.isEmpty {
-                node?.next = upperBound.node
-                if upperBound == endIndex {
-                    tail = node
-                }
+                beforeNode?.next = fromNode
+                if upperBound == endIndex { tail = beforeNode }
             } else {
                 let list = createNodes(with: newElements)
-                node?.next = list.head
-                list.tail?.next = upperBound.node
-                
-                if upperBound == endIndex {
-                    tail = list.tail
-                }
+                beforeNode?.next = list.head
+                list.tail?.next = fromNode
+                if upperBound == endIndex { tail = list.tail }
             }
         }
     }
@@ -164,6 +169,28 @@ extension LinkedList: RangeReplaceableCollection {
                 newNode?.next = Node(value: nextOldValue.value)
                 newNode = newNode?.next
                 oldNode = nextOldValue
+            }
+            
+            return newNode
+        }
+    }
+    
+    private mutating func copyNodes(from index: Index) -> Node? {
+        guard index != endIndex else { return nil }
+        
+        if isKnownUniquelyReferenced(&head) {
+            return index.node
+        } else {
+            var oldNode = index.node
+            var newNode: Node? = Node(value: oldNode!.value)
+            defer {
+                while let nextOldNode = oldNode?.next {
+                    newNode?.next = Node(value: nextOldNode.value)
+                    newNode = newNode?.next
+                    oldNode = nextOldNode
+                }
+                
+                tail = newNode
             }
             
             return newNode
