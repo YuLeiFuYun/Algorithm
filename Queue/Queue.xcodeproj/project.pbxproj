@@ -10,9 +10,6 @@
 		4EA953DD2689AA3400856D27 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953DC2689AA3400856D27 /* main.swift */; };
 		4EA953E42689AAC900856D27 /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953E32689AAC900856D27 /* Queue.swift */; };
 		4EA953E62689AAE100856D27 /* QueueArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953E52689AAE100856D27 /* QueueArray.swift */; };
-		4EA953E82689AD7200856D27 /* QueueLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953E72689AD7100856D27 /* QueueLinkedList.swift */; };
-		4EA953EA2689B0ED00856D27 /* DoublyLinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953E92689B0ED00856D27 /* DoublyLinkedList.swift */; };
-		4EA953EC2689B5EE00856D27 /* LinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953EB2689B5EE00856D27 /* LinkedList.swift */; };
 		4EA953EE2689B90B00856D27 /* QueueRingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA953ED2689B90B00856D27 /* QueueRingBuffer.swift */; };
 		4EA95407268AD03300856D27 /* RingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA95406268AD03300856D27 /* RingBuffer.swift */; };
 		4EA95409268AF8D000856D27 /* QueueStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA95408268AF8D000856D27 /* QueueStack.swift */; };
@@ -35,9 +32,6 @@
 		4EA953DC2689AA3400856D27 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		4EA953E32689AAC900856D27 /* Queue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queue.swift; sourceTree = "<group>"; };
 		4EA953E52689AAE100856D27 /* QueueArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueueArray.swift; sourceTree = "<group>"; };
-		4EA953E72689AD7100856D27 /* QueueLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueueLinkedList.swift; sourceTree = "<group>"; };
-		4EA953E92689B0ED00856D27 /* DoublyLinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoublyLinkedList.swift; sourceTree = "<group>"; };
-		4EA953EB2689B5EE00856D27 /* LinkedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedList.swift; sourceTree = "<group>"; };
 		4EA953ED2689B90B00856D27 /* QueueRingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueueRingBuffer.swift; sourceTree = "<group>"; };
 		4EA95406268AD03300856D27 /* RingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingBuffer.swift; sourceTree = "<group>"; };
 		4EA95408268AF8D000856D27 /* QueueStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueueStack.swift; sourceTree = "<group>"; };
@@ -74,12 +68,9 @@
 			isa = PBXGroup;
 			children = (
 				4EA953DC2689AA3400856D27 /* main.swift */,
-				4EA953EB2689B5EE00856D27 /* LinkedList.swift */,
-				4EA953E92689B0ED00856D27 /* DoublyLinkedList.swift */,
 				4EA95406268AD03300856D27 /* RingBuffer.swift */,
 				4EA953E32689AAC900856D27 /* Queue.swift */,
 				4EA953E52689AAE100856D27 /* QueueArray.swift */,
-				4EA953E72689AD7100856D27 /* QueueLinkedList.swift */,
 				4EA953ED2689B90B00856D27 /* QueueRingBuffer.swift */,
 				4EA95408268AF8D000856D27 /* QueueStack.swift */,
 			);
@@ -113,7 +104,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1300;
 				TargetAttributes = {
 					4EA953D82689AA3400856D27 = {
 						CreatedOnToolsVersion = 12.5;
@@ -143,11 +134,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4EA953EC2689B5EE00856D27 /* LinkedList.swift in Sources */,
-				4EA953EA2689B0ED00856D27 /* DoublyLinkedList.swift in Sources */,
 				4EA95409268AF8D000856D27 /* QueueStack.swift in Sources */,
 				4EA953EE2689B90B00856D27 /* QueueRingBuffer.swift in Sources */,
-				4EA953E82689AD7200856D27 /* QueueLinkedList.swift in Sources */,
 				4EA953E62689AAE100856D27 /* QueueArray.swift in Sources */,
 				4EA95407268AD03300856D27 /* RingBuffer.swift in Sources */,
 				4EA953DD2689AA3400856D27 /* main.swift in Sources */,
@@ -276,6 +264,7 @@
 		4EA953E12689AA3400856D27 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3BVDP23RF2;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -287,6 +276,7 @@
 		4EA953E22689AA3400856D27 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3BVDP23RF2;
 				ENABLE_HARDENED_RUNTIME = YES;
