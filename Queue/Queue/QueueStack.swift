@@ -68,8 +68,13 @@ extension FIFOQueue: MutableCollection, RandomAccessCollection {
     public var endIndex: Int { left.count + right.count }
     
     public func index(after i: Int) -> Int {
-        precondition(i >= startIndex && i < endIndex, "Index out of bounds")
+        precondition((startIndex..<endIndex).contains(i), "Index out of bounds")
         return i + 1
+    }
+    
+    func index(before i: Int) -> Int {
+        precondition((startIndex..<endIndex).contains(i), "Index out of bounds")
+        return i - 1
     }
     
     public subscript(position: Int) -> Element {
