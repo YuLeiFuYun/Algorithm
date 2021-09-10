@@ -7,6 +7,266 @@
 
 import Foundation
 
+public final class BinarySearchTree<Key: Comparable, Value> {
+    fileprivate final class TreeNode {
+        var key: Key
+        var value: Value
+        var size = 1
+        var left: TreeNode?
+        var right: TreeNode?
+        
+        init(key: Key, value: Value) {
+            self.key = key
+            self.value = value
+        }
+    }
+    
+    fileprivate var root: TreeNode?
+}
+
+public extension BinarySearchTree {
+    var height: Int { height(root) }
+    
+    var size: Int { root?.size ?? 0 }
+    
+    func get(_ key: Key) -> Value? {
+        var current = root
+        while let node = current {
+            if key < node.key {
+                current = current?.left
+            } else if key > node.key {
+                current = current?.right
+            } else {
+                return node.value
+            }
+        }
+        
+        return nil
+    }
+    
+    func put(_ value: Value, at key: Key) {
+        root = put(root, key, value: value)
+    }
+    
+    func contains(_ key: Key) -> Bool { get(key) != nil }
+    
+    func minKey() -> Key? { minKey(root)?.key }
+    
+    func maxKey() -> Key? { maxKey(root)?.key }
+    
+    func floor(_ key: Key) -> Key? { floor(root, key, nil) }
+    
+    func ceil(_ key: Key) -> Key? { ceil(root, key, nil) }
+    
+    // 返回 BST 中排名第 rank 的键
+    func select(_ rank: Int) -> Key? {
+        precondition((0..<size).contains(rank), "select(_:) 参数无效")
+        return select(root, rank)
+    }
+    
+    // 返回 BST 中严格小于 key 的键的数量
+    func rank(_ key: Key) -> Int { rank(root, key) }
+    
+    func deleteMinKey() { root = deleteMin(root) }
+    
+    func deleteMaxKey() { root = deleteMax(root) }
+    
+    func delete(_ key: Key) { root = delete(root, key) }
+    
+    func keys(_ lo: Key, _ hi: Key) -> [Key] {
+        var queue: [Key] = []
+        keys(root, &queue, lo, hi)
+        return queue
+    }
+    
+    func keys() -> [Key] { root == nil ? [] : keys(minKey()!, maxKey()!) }
+    
+    // 检查 BST 数据结构的完整性
+    func check() -> Bool {
+        if !isBST { print("Not in symmetric order"); return false }
+        if !isSizeConsistent { print("Subtree counts not consistent"); return false }
+        if !isRankConsistent { print("Ranks not consistent"); return false }
+        return true
+    }
+    
+    func levelorderTraversal() -> [Key] {
+        guard let root = root else { return [] }
+        
+        var queue: Queue<TreeNode> = [root], result: [Key] = []
+        while let node = queue.dequeue() {
+            result.append(node.key)
+            if let leftNode = node.left { queue.enqueue(leftNode) }
+            if let rightNode = node.right { queue.enqueue(rightNode) }
+        }
+        return result
+    }
+}
+
+fileprivate extension BinarySearchTree {
+    func height(_ node: TreeNode?) -> Int {
+        guard let node = node else { return -1 }
+        return 1 + Swift.max(height(node.left), height(node.right))
+    }
+    
+    func put(_ node: TreeNode?, _ key: Key, value: Value) -> TreeNode {
+        guard let node = node else { return TreeNode(key: key, value: value) }
+        
+        if key < node.key {
+            node.left = put(node.left, key, value: value)
+        } else if key > node.key {
+            node.right = put(node.right, key, value: value)
+        } else {
+            node.value = value
+        }
+        
+        node.size = (node.left?.size ?? 0) + (node.right?.size ?? 0) + 1
+        return node
+    }
+    
+    func minKey(_ node: TreeNode?) -> TreeNode? {
+        node?.left == nil ? node : minKey(node?.left)
+    }
+    
+    func maxKey(_ node: TreeNode?) -> TreeNode? {
+        node?.right == nil ? node : node?.right
+    }
+    
+    func floor(_ node: TreeNode?, _ key: Key, _ best: Key?) -> Key? {
+        guard let node = node else { return best }
+        
+        if key < node.key { return floor(node.left, key, best) }
+        if key > node.key { return floor(node.right, key, node.key) }
+        return node.key
+    }
+    
+    func ceil(_ node: TreeNode?, _ key: Key, _ best: Key?) -> Key? {
+        guard let node = node else { return nil }
+        
+        if key < node.key { return ceil(node.left, key, node.key) }
+        if key > node.key { return ceil(node.right, key, best) }
+        return node.key
+    }
+    
+    func select(_ node: TreeNode?, _ rank: Int) -> Key? {
+        guard let node = node else { return nil }
+        
+        let leftSize = node.left?.size ?? 0
+        if rank < leftSize { return select(node.left, rank) }
+        if rank > leftSize { return select(node.right, rank - leftSize - 1) }
+        return node.key
+    }
+    
+    func rank(_ node: TreeNode?, _ key: Key) -> Int {
+        guard let node = node else { return 0 }
+        
+        if key < node.key { return rank(node.left, key) }
+        if key > node.key { return 1 + (node.left?.size ?? 0) + rank(node.right, key) }
+        return node.left?.size ?? 0
+    }
+    
+    func deleteMin(_ node: TreeNode?) -> TreeNode? {
+        if node?.left == nil { return node?.right }
+        
+        node?.left = deleteMin(node?.left)
+        node?.size = 1 + (node?.left?.size ?? 0) + (node?.right?.size ?? 0)
+        return node
+    }
+    
+    func deleteMax(_ node: TreeNode?) -> TreeNode? {
+        if node?.right == nil { return node?.left }
+        
+        node?.right = deleteMax(node?.right)
+        node?.size = 1 + (node?.left?.size ?? 0) + (node?.right?.size ?? 0)
+        return node
+    }
+    
+    func delete(_ node: TreeNode?, _ key: Key) -> TreeNode? {
+        guard var node = node else { return nil }
+        
+        if key < node.key {
+            node.left = delete(node.left, key)
+        } else if key > node.key {
+            node.right = delete(node.right, key)
+        } else {
+            if node.left == nil { return node.right }
+            if node.right == nil { return node.left }
+            
+            let temp = node
+            node = minKey(temp.right)!
+            node.right = deleteMin(temp.right)
+            node.left = temp.left
+        }
+        
+        node.size = 1 + (node.left?.size ?? 0) + (node.right?.size ?? 0)
+        return node
+    }
+    
+    func keys(_ node: TreeNode?, _ queue: inout [Key], _ lo: Key, _ hi: Key) {
+        guard let node = node else { return }
+        
+        if lo < node.key { keys(node.left, &queue, lo, hi) }
+        if lo <= node.key && hi >= node.key { queue.append(node.key) }
+        if hi > node.key { keys(node.right, &queue, lo, hi) }
+    }
+    
+    // 检查此对象是否是一颗二叉树
+    var isBST: Bool { isBST(root, nil, nil) }
+    
+    func isBST(_ node: TreeNode?, _ min: Key?, _ max: Key?) -> Bool {
+        guard let node = node else { return true }
+        
+        if let min = min, node.key <= min { return false }
+        if let max = max, node.key >= max { return false }
+        return isBST(node.left, min, node.key) && isBST(node.right, node.key, max)
+    }
+    
+    // size 数值是否正确
+    var isSizeConsistent: Bool { isSizeConsistent(root) }
+    
+    func isSizeConsistent(_ node: TreeNode?) -> Bool {
+        guard let node = node else { return true }
+        
+        if node.size != (node.left?.size ?? 0) + (node.right?.size ?? 0) + 1 { return false }
+        return isSizeConsistent(node.left) && isSizeConsistent(node.right)
+    }
+    
+    // 对任意 0 到 size - 1 之间的 i 和树中的任意键，是否都有 i == rank(select(i)!) && key == select(rank(key))
+    var isRankConsistent: Bool {
+        for i in 0..<size {
+            if i != rank(select(i)!) { return false }
+        }
+        
+        for key in keys() {
+            if key != select(rank(key)) { return false }
+        }
+        return true
+    }
+}
+
+extension BinarySearchTree: CustomStringConvertible {
+    public var description: String {
+        diagram(for: root)
+    }
+    
+    private func diagram(
+        for node: TreeNode?,
+        _ top: String = "",
+        _ root: String = "",
+        _ bottom: String = ""
+    ) -> String {
+        guard let node = node else { return root + "nil\n" }
+        
+        if node.left == nil && node.right == nil {
+            return root + "\(node.value)\n"
+        }
+        
+        return diagram(for: node.right, top + " ", top + "┌──", top + "│ ")
+        + root + "\(node.value)\n"
+        + diagram(for: node.left, bottom + "│ ", bottom + "└──", bottom + " ")
+    }
+}
+
+/*
 public final class BST<Key: Comparable, Value> {
     fileprivate final class TreeNode {
         var key: Key
@@ -39,8 +299,7 @@ public extension BST {
     
     // 对任意 0 到 size - 1 之间的 i 和树中的任意 key，是否都有 i == rank(select(i)!) && key == select(rank(key))
     var isRankConsistent: Bool {
-        let n = root?.size ?? 0
-        for i in 0..<n {
+        for i in 0..<size {
             if i != rank(select(i)!) { return false }
         }
         
@@ -327,225 +586,6 @@ extension BST: CustomStringConvertible {
         return diagram(for: node.right, top + " ", top + "┌──", top + "│ ")
         + root + "\(node.value)\n"
         + diagram(for: node.left, bottom + "│ ", bottom + "└──", bottom + " ")
-    }
-}
-
-/*
-public final class BST<Key: Comparable, Value> {
-    private class TreeNode {
-        var key: Key
-        var value: Value
-        var left: TreeNode?
-        var right: TreeNode?
-        var height = 0
-        var totalNumberOfNodes = 1
-        
-        init(key: Key, value: Value) {
-            self.key = key
-            self.value = value
-        }
-    }
-    
-    private var root: TreeNode?
-}
-
-public extension BST {
-    var count: Int { count(root) }
-    
-    var height: Int {
-//        height(root)
-        root?.height ?? 0
-    }
-    
-    subscript(key: Key) -> Value? {
-        get { get(root, key) }
-        
-        set {
-            if let newValue = newValue {
-                root = set(root, key, newValue)
-            } else {
-                root = delete(root, key)
-            }
-        }
-    }
-    
-    func minKey() -> Key? { min(root)?.key }
-    
-    func maxKey() -> Key? { max(root)?.key }
-    
-    func floor(_ key: Key) -> Key? { floor(root, key)?.key }
-    
-    func ceil(_ key: Key) -> Key? { ceil(root, key)?.key }
-    
-    /// 返回排名为 k 的节点
-    func select(_ k: Int) -> Key? { select(root, k)?.key }
-    
-    /// 返回小于 key 的键的数量
-    func rank(_ key: Key) -> Int { rank(root, key) }
-    
-    func deleteMin() { root = deleteMin(root) }
-    
-    func deleteMax() { root = deleteMax(root) }
-    
-    func delete(_ key: Key) { root = delete(root, key) }
-    
-    func keys(lo: Key, hi: Key) -> [Key] {
-        var queue: [Key] = []
-        keys(root, &queue, lo, hi)
-        return queue
-    }
-    
-    func keys() -> [Key] {
-        keys(lo: minKey()!, hi: maxKey()!)
-    }
-}
-
-extension BST {
-    private func count(_ node: TreeNode?) -> Int {
-        node == nil ? 0 : node!.totalNumberOfNodes
-    }
-    
-    private func height(_ node: TreeNode?) -> Int {
-        if node == nil {
-            return -1
-        } else {
-            return 1 + Swift.max(height(node?.left), height(node?.right))
-        }
-    }
-    
-    private func get(_ node: TreeNode?, _ key: Key) -> Value? {
-        guard let node = node else { return nil }
-        
-        if key < node.key {
-            return get(node.left, key)
-        } else if key > node.key {
-            return get(node.right, key)
-        } else {
-            return node.value
-        }
-    }
-    
-    private func set(_ node: TreeNode?, _ key: Key, _ value: Value) -> TreeNode {
-        guard let node = node else { return TreeNode(key: key, value: value) }
-        
-        if key < node.key {
-            node.left = set(node.left, key, value)
-        } else if key > node.key {
-            node.right = set(node.right, key, value)
-        } else {
-            node.value = value
-        }
-        
-        node.height = 1 + Swift.max((node.left?.height ?? 0), (node.right?.height ?? 0))
-        node.totalNumberOfNodes = (node.left?.totalNumberOfNodes ?? 0) + (node.right?.totalNumberOfNodes ?? 0) + 1
-        return node
-    }
-    
-    private func min(_ node: TreeNode?) -> TreeNode? {
-        node?.left == nil ? node : min(node?.left)
-    }
-    
-    private func max(_ node: TreeNode?) -> TreeNode? {
-        node?.right == nil ? node : max(node?.right)
-    }
-    
-    private func floor(_ node: TreeNode?, _ key: Key) -> TreeNode? {
-        guard let node = node else { return nil }
-        
-        if key == node.key { return node }
-        if key < node.key { return floor(node.left, key) }
-        
-        if let floorNode = floor(node.right, key) {
-            return floorNode
-        } else {
-            return node
-        }
-    }
-    
-    private func ceil(_ node: TreeNode?, _ key: Key) -> TreeNode? {
-        guard let node = node else { return nil }
-        
-        if key == node.key { return node }
-        if key > node.key { return ceil(node.right, key) }
-        
-        if let ceilNode = ceil(node.left, key) {
-            return ceilNode
-        } else {
-            return node
-        }
-    }
-    
-    private func select(_ node: TreeNode?, _ k: Int) -> TreeNode? {
-        guard let node = node else { return nil }
-        
-        let t = node.left?.totalNumberOfNodes ?? 0
-        if t > k {
-            return select(node.left, k)
-        } else if t < k {
-            return select(node.right, k - t - 1)
-        } else {
-            return node
-        }
-    }
-    
-    private func rank(_ node: TreeNode?, _ key: Key) -> Int {
-        guard let node = node else { return 0 }
-        
-        if key < node.key {
-            return rank(node.left, key)
-        } else if key > node.key {
-            return 1 + (node.left?.totalNumberOfNodes ?? 0) + rank(node.right, key)
-        } else {
-            return node.left?.totalNumberOfNodes ?? 0
-        }
-    }
-    
-    private func deleteMin(_ node: TreeNode?) -> TreeNode? {
-        if node?.left == nil { return node?.right }
-        
-        node?.left = deleteMin(node?.left)
-        node?.height = 1 + Swift.max((node?.left?.height ?? 0), (node?.right?.height ?? 0))
-        node?.totalNumberOfNodes = 1 + (node?.left?.totalNumberOfNodes ?? 0) + (node?.right?.totalNumberOfNodes ?? 0)
-        return node
-    }
-    
-    private func deleteMax(_ node: TreeNode?) -> TreeNode? {
-        if node?.right == nil { return node?.left }
-        
-        node?.right = deleteMax(node?.right)
-        node?.height = 1 + Swift.max((node?.left?.height ?? 0), (node?.right?.height ?? 0))
-        node?.totalNumberOfNodes = 1 + (node?.left?.totalNumberOfNodes ?? 0) + (node?.right?.totalNumberOfNodes ?? 0)
-        return node
-    }
-    
-    private func delete(_ node: TreeNode?, _ key: Key) -> TreeNode? {
-        guard var node = node else { return nil }
-        
-        if key < node.key {
-            node.left = delete(node.left, key)
-        } else if key > node.key {
-            node.right = delete(node.right, key)
-        } else {
-            if node.right == nil { return node.left }
-            if node.left == nil { return node.right }
-            
-            let temp = node
-            node = min(temp.right)!
-            node.right = deleteMin(temp.right)
-            node.left = temp.left
-        }
-        
-        node.height = 1 + Swift.max((node.left?.height ?? 0), (node.right?.height ?? 0))
-        node.totalNumberOfNodes = (node.left?.totalNumberOfNodes ?? 0) + (node.right?.totalNumberOfNodes ?? 0) + 1
-        return node
-    }
-    
-    private func keys(_ node: TreeNode?, _ queue: inout [Key], _ lo: Key, _ hi: Key) {
-        guard let node = node else { return }
-        
-        if lo < node.key { keys(node.left, &queue, lo, hi) }
-        if lo <= node.key && hi >= node.key { queue.append(node.key) }
-        if hi > node.key { keys(node.right, &queue, lo, hi) }
     }
 }
 */
